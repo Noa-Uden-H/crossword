@@ -10,8 +10,11 @@ BUTTON = pg.Color("blue4")
 BACKGROUND = pg.Color("gray74")
 BLACK = pg.Color("black")
 
-def toggle():
-    return
+def toggle(var: bool):
+    if var == False:
+        var = True
+    else:
+        var = False
 
 class Textbox:
     def x():
