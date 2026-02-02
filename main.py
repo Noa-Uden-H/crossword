@@ -1,7 +1,14 @@
 import pygame as pg
 import pygame.display as disp
 import pygame.freetype as ft
-import pygame.colordict as color
+
+global STANDARD, INACTIVE, ACTIVE, CORRECT, BUTTON, BACKGROUND, BLACK
+INACTIVE = pg.Color("white")
+ACTIVE = pg.Color("skyblue")
+CORRECT = pg.Color("green4")
+BUTTON = pg.Color("blue4")
+BACKGROUND = pg.Color("gray74")
+BLACK = pg.Color("black")
 
 def toggle():
     return
