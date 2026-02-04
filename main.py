@@ -16,7 +16,7 @@ BACKGROUND = pg.Color("gray74")
 BLACK = pg.Color("black")
 
 global FONT1
-FONT1 = ft.SysFont("Calibri", 20, False, False)
+FONT1 = ft.SysFont("Calibri", 50, False, False)
 
 class Textbox:
     def __init__(self, x=int, y=int, width=int, height=int, textcolor=pg.Color, screen=pg.Surface):
@@ -29,13 +29,15 @@ class Textbox:
         self.color = INACTIVE
         self.active = False
 
-        self.text, self.textrect = "", pg.rect
-        self.textfield = pg.Surface
+        self.text, self.textfield = "", pg.Surface
 
     def draw(self):
-        self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
-        self.screen.blit(self.textfield, self.rect)
         pg.draw.rect(self.screen, self.color, self.rect)
+        self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
+        # Centrer tekst
+        text_pos = (self.rect.x + (self.rect.width - self.textfield.get_width()) // 2,
+                    self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
+        self.screen.blit(self.textfield, text_pos)
 
     def check_events(self, event):
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos): # Håndterer aktivering af klik. Kan laves mere effektiv?
