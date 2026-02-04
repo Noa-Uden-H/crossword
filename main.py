@@ -54,12 +54,13 @@ def main():
 while running:
     clock.tick(60) # 60 FPS
 
+    # Lyt efter input. Hvis spillet lukkes, stoppes spillet
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
-    screen.fill((100,100,255))
+    screen.fill((100,100,255)) #Baggrundsfarve
 
     # Render
-    ft.Font.render_to(FONT1, screen, pg.Rect(50,50,200,200), "Calibri", BLACK, (255,255,255))
-    disp.flip()
+    ft.Font.render_to(FONT1, screen, pg.Rect(50,50,300,300), "Hello World", BLACK, (255,255,255)) #Viser tekst på "screen"
+    disp.flip() #Render næste frame
