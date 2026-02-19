@@ -19,7 +19,7 @@ global FONT1
 FONT1 = ft.SysFont("Calibri", 50, False, False)
 
 class Textbox:
-    def __init__(self, x=int, y=int, width=int, height=int, textcolor=pg.Color, screen=pg.Surface):
+    def __init__(self, x: int, y: int, width: int, height: int, textcolor: pg.Color, screen: pg.Surface):
         self.x = x
         self.y = y
         self.rect = pg.Rect(x, y, width, height)
@@ -79,8 +79,26 @@ screen.fill((100,100,255)) #Baggrundsfarve
 ft.Font.render_to(FONT1, screen, pg.Rect(500,50,300,300), "Hello World", BLACK, (255,255,255)) #Viser tekst på "screen"
     
 # Tekstbokse
+testgrid = [
+    [0,1,1,0,1],
+    [1,1,0,0,1],
+    [0,1,0,1,1],
+    [0,1,0,0,1],
+    [0,1,1,1,1]
+]
+testgridsize: int = 30
+
+
 testbox = Textbox(20,20,50,50,CORRECT,screen)
 boxes = [testbox]
+
+for y, row in enumerate(testgrid):
+    for x, value in enumerate(row):
+        if value == 1:
+            box = Textbox(x*testgridsize+200, y*testgridsize+200, testgridsize-2, testgridsize-2, BLACK, screen)
+            boxes.append(box)
+            print(x,y)
+            print(x*testgridsize+200,y*testgridsize+200)
 
 #Gameloop test
 while running:
