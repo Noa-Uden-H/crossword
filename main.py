@@ -1,6 +1,7 @@
 import pygame as pg
 import pygame.display as disp
 import pygame.freetype as ft
+import levels as lv
 
 pg.init()
 screen = disp.set_mode((1280, 720))
@@ -31,7 +32,7 @@ class Textbox:
 
         self.text, self.textfield = "", pg.Surface
 
-    def draw(self):
+    def draw(self) -> None:
         pg.draw.rect(self.screen, self.color, self.rect)
         self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
         # Centrer tekst
@@ -39,7 +40,7 @@ class Textbox:
                     self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
         self.screen.blit(self.textfield, text_pos)
 
-    def check_events(self, event):
+    def check_events(self, event) -> None:
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos): # Håndterer aktivering af klik. Kan laves mere effektiv?
             self.active = not self.active
         if event.type == pg.MOUSEBUTTONDOWN and not self.rect.collidepoint(event.pos):
@@ -54,8 +55,13 @@ class Textbox:
         
         self.draw()
     
-    def checkcorrect(self):
-        return
+    def checkcorrect(self, correctarray) -> bool:
+        if correctarray[self.x, self.y] == self.text:
+            self.color = CORRECT
+            return True
+        else:
+            self.text = ""
+            return False
         
 
 class Button:
@@ -73,6 +79,15 @@ def main_screen():
 
 def main():
     return
+
+def create_grid(grid, list, gridsize):
+    for y, row in enumerate(grid):
+        for x, value in enumerate(row):
+            if value == 1:
+                box = Textbox(x*gridsize+200, y*gridsize+200, gridsize-2, gridsize-2, BLACK, screen)
+                list.append(box)
+                print(x,y)
+                print(x*gridsize+200,y*gridsize+200)
 
 screen.fill((100,100,255)) #Baggrundsfarve
 
@@ -92,13 +107,7 @@ testgridsize: int = 30
 testbox = Textbox(20,20,50,50,CORRECT,screen)
 boxes = [testbox]
 
-for y, row in enumerate(testgrid):
-    for x, value in enumerate(row):
-        if value == 1:
-            box = Textbox(x*testgridsize+200, y*testgridsize+200, testgridsize-2, testgridsize-2, BLACK, screen)
-            boxes.append(box)
-            print(x,y)
-            print(x*testgridsize+200,y*testgridsize+200)
+
 
 #Gameloop test
 while running:
