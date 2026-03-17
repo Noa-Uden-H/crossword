@@ -1,11 +1,13 @@
 import pygame as pg
 import pygame.display as disp
 import pygame.freetype as ft
+import levels as lv
 
 pg.init()
 screen = disp.set_mode((1280, 720))
 clock = pg.time.Clock()
 running = True
+LettersLeft = 0
 
 global INACTIVE, ACTIVE, CORRECT, BUTTON, BACKGROUND, BLACK
 INACTIVE = pg.Color("white")
@@ -65,11 +67,29 @@ class Button:
 def show_level():
     return
 
-def won():
-    return
+def won(level):
+    levelheight = len(level)
+    levelwidth = len(level[0])
+    if LettersLeft == 0:
+        for row in range(levelheight):
+            for column in range(levelwidth):
+                if level[row][column] !=0:
+                    LettersLeft +=1
+    
+    if LettersLeft == 0:
+        win_screen()
+        # waitForUserPress()
 
 def main_screen():
     return
+
+def win_screen():
+    screen.fill(BACKGROUND)
+    win_textfield, win_rect = FONT1.render("Tillykke, du har vundet!",CORRECT)
+    win_pos = (win_rect.x + (win_rect.width - win_textfield.get_width()) // 2,
+               win_rect.y + (win_rect.height - win_textfield.get_height())//2)
+    screen.blit(win_textfield,win_pos)
+
 
 def main():
     return
@@ -91,6 +111,7 @@ testgridsize: int = 30
 
 testbox = Textbox(20,20,50,50,CORRECT,screen)
 boxes = [testbox]
+
 
 for y, row in enumerate(testgrid):
     for x, value in enumerate(row):
