@@ -92,8 +92,8 @@ def win_screen():
     screen.fill(BACKGROUND)
     win_textfield, win_rect = FONT1.render("Tillykke, du har vundet!",CORRECT)
     win_pos = (win_rect.x + (win_rect.width - win_textfield.get_width()) // 2,
-               win_rect.y + (win_rect.height - win_textfield.get_height())//2)
-    screen.blit(win_textfield,win_pos)
+               win_rect.y + (win_rect.height - win_textfield.get_height()) // 2)
+    screen.blit(win_textfield, win_pos)
 
 
 def main():
@@ -127,9 +127,6 @@ testbox = Textbox(20,20,50,50,CORRECT,screen)
 boxes = [testbox]
 
 
-
-
-
 #Gameloop test
 while running:
     clock.tick(60) # 60 FPS
@@ -143,5 +140,5 @@ while running:
             box.check_events(event)
     
     # Render
-    
+
     disp.flip() #Render næste frame
