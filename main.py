@@ -57,8 +57,9 @@ class Textbox:
         self.draw()
     
     def checkcorrect(self, correctarray) -> bool:
-        if correctarray[self.x, self.y] == self.text:
+        if correctarray[self.x][self.y] == self.text:
             self.color = CORRECT
+            LettersLeft -= 1
             return True
         else:
             self.text = ""
@@ -69,8 +70,14 @@ class Button:
     def x():
         return
 
-def show_level():
-    return
+def show_level(levelarray, list, gridsize):
+    for y, row in enumerate(levelarray):
+        for x, value in enumerate(row):
+            if value == 1:
+                box = Textbox(x*gridsize+200, y*gridsize+200, gridsize-2, gridsize-2, BLACK, screen)
+                list.append(box)
+                print(x,y)
+                print(x*gridsize+200,y*gridsize+200)    
 
 def won(level):
     levelheight = len(level)
@@ -98,15 +105,7 @@ def win_screen():
 
 def main():
     return
-
-def create_grid(grid, list, gridsize):
-    for y, row in enumerate(grid):
-        for x, value in enumerate(row):
-            if value == 1:
-                box = Textbox(x*gridsize+200, y*gridsize+200, gridsize-2, gridsize-2, BLACK, screen)
-                list.append(box)
-                print(x,y)
-                print(x*gridsize+200,y*gridsize+200)
+    
 
 screen.fill((100,100,255)) #Baggrundsfarve
 
