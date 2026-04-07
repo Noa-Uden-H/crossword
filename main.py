@@ -33,7 +33,7 @@ class Textbox:
 
         self.text, self.textfield = "", pg.Surface
 
-    def draw(self):
+    def draw(self) -> None:
         pg.draw.rect(self.screen, self.color, self.rect)
         self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
         # Centrer tekst
@@ -41,7 +41,7 @@ class Textbox:
                     self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
         self.screen.blit(self.textfield, text_pos)
 
-    def check_events(self, event):
+    def check_events(self, event) -> None:
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos): # Håndterer aktivering af klik. Kan laves mere effektiv?
             self.active = not self.active
         if event.type == pg.MOUSEBUTTONDOWN and not self.rect.collidepoint(event.pos):
@@ -56,16 +56,28 @@ class Textbox:
         
         self.draw()
     
-    def checkcorrect(self):
-        return
+    def checkcorrect(self, correctarray) -> bool:
+        if correctarray[self.x][self.y] == self.text:
+            self.color = CORRECT
+            LettersLeft -= 1
+            return True
+        else:
+            self.text = ""
+            return False
         
 
 class Button:
     def x():
         return
 
-def show_level():
-    return
+def show_level(levelarray, list, gridsize):
+    for y, row in enumerate(levelarray):
+        for x, value in enumerate(row):
+            if value == 1:
+                box = Textbox(x*gridsize+200, y*gridsize+200, gridsize-2, gridsize-2, BLACK, screen)
+                list.append(box)
+                print(x,y)
+                print(x*gridsize+200,y*gridsize+200)    
 
 def won(level):
     levelheight = len(level)
@@ -142,13 +154,12 @@ def win_screen():
     screen.fill(BACKGROUND)
     win_textfield, win_rect = FONT1.render("Tillykke, du har vundet!",CORRECT)
     win_pos = (win_rect.x + (win_rect.width - win_textfield.get_width()) // 2,
-               win_rect.y + (win_rect.height - win_textfield.get_height())//2)
-    screen.blit(win_textfield,win_pos)
+               win_rect.y + (win_rect.height - win_textfield.get_height()) // 2)
+    screen.blit(win_textfield, win_pos)
 
 
 def main():
-   
-return
+    ...
 
 screen.fill((100,100,255)) #Baggrundsfarve
 
@@ -169,14 +180,6 @@ testbox = Textbox(20,20,50,50,CORRECT,screen)
 boxes = [testbox]
 
 
-for y, row in enumerate(testgrid):
-    for x, value in enumerate(row):
-        if value == 1:
-            box = Textbox(x*testgridsize+200, y*testgridsize+200, testgridsize-2, testgridsize-2, BLACK, screen)
-            boxes.append(box)
-            print(x,y)
-            print(x*testgridsize+200,y*testgridsize+200)
-
 #Gameloop test
 while running:
     clock.tick(60) # 60 FPS
@@ -190,5 +193,5 @@ while running:
             box.check_events(event)
     
     # Render
-    
+
     disp.flip() #Render næste frame
