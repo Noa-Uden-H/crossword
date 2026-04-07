@@ -67,8 +67,35 @@ class Textbox:
         
 
 class Button:
-    def x():
-        return
+    def __init__(self, coordinates: tuple, color: pg.Color, width: int, height: int, screen, text: str, function: function, *args):
+        self.x = coordinates[0]
+        self.y = coordinates[1]
+        self.width = width
+        self.height = height
+        self.rect = pg.Rect(self.x, self.y, self.width, self.height)
+
+        self.color = color
+        self.text = text
+        self.textfield = pg.Surface
+        self.screen = screen
+
+        self.function = function
+        self.args = args
+
+    def draw(self):
+        pg.draw.rect(self.screen, self.color, self.rect)
+
+        if self.text != '':
+            self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
+            # Centrer tekst
+            text_pos = (self.rect.x + (self.rect.width - self.textfield.get_width()) // 2,
+                        self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
+            self.screen.blit(self.textfield, text_pos)
+
+    def event_check(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
+            self.function(self.args)
+        
 
 def show_level(levelarray, list, gridsize):
     for y, row in enumerate(levelarray):
