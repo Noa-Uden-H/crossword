@@ -67,8 +67,17 @@ class Textbox:
         
 
 class Button:
-    def x():
-        return
+    def __init__(self, coordinates, color, width, height, screen, text=""):
+        self.color = color
+        self.x = coordinates[0]
+        self.y = coordinates[1]
+        self.width = width
+        self.height = height
+        self.text = text
+        self.screen = screen
+
+    def draw():
+        ...
 
 def show_level(levelarray, list, gridsize):
     for y, row in enumerate(levelarray):
