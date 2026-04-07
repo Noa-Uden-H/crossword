@@ -101,8 +101,63 @@ def won(level):
         win_screen()
         # waitForUserPress()
 
-def main_screen():
-    return
+def main_screen(screen):
+    """Kort, modulær startskærm. Returnerer valgt level (1..3) eller None ved luk."""
+    clock_local = pg.time.Clock()
+    W, H = screen.get_size()
+
+    # Knappestørrelse + layout
+    BW, BH, GAP = 160, 160, 40
+    start_x = (W - (3 * BW + 2 * GAP)) // 2
+    y = 200
+    buttons = [pg.Rect(start_x + i * (BW + GAP), y, BW, BH) for i in range(3)]
+
+    small = ft.SysFont("Calibri", 24)
+    tiny = ft.SysFont("Calibri", 12)
+
+    def draw_thumb(surf, r):
+        t = pg.Rect(r.x + 20, r.y + 15, r.w - 40, r.h - 70)
+        pg.draw.rect(surf, (210, 210, 210), t)
+        pg.draw.line(surf, (180, 180, 180), t.topleft, t.bottomright, 2)
+        pg.draw.line(surf, (180, 180, 180), t.topright, t.bottomleft, 2)
+
+    def center_render(surf, text, font, color, y_pos):
+        txt_surf, _ = font.render(text, color)
+        surf.blit(txt_surf, (W // 2 - txt_surf.get_width() // 2, y_pos))
+
+    while True:
+        for e in pg.event.get():
+            if e.type == pg.QUIT:
+                return None
+            if e.type == pg.KEYDOWN and e.key in (pg.K_1, pg.K_2, pg.K_3):
+                try:
+                    return int(e.unicode)
+                except Exception:
+                    pass
+            if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
+                for idx, r in enumerate(buttons, 1):
+                    if r.collidepoint(e.pos):
+                        return idx
+
+        # Tegning
+        screen.fill(BACKGROUND)
+        pg.draw.rect(screen, (220, 220, 220), (0, 0, W, 70))
+        center_render(screen, "Krydsord", FONT1, BLACK, 20)
+        center_render(screen, "Vælg et level og begynd det sjove", small, BLACK, 100)
+
+        for i, r in enumerate(buttons, 1):
+            pg.draw.rect(screen, (150, 150, 150), r.inflate(4, 4))
+            pg.draw.rect(screen, (200, 200, 200), r)
+            draw_thumb(screen, r)
+            lbl_surf, _ = ft.SysFont("Calibri", 18).render(f"Level {i}", BLACK)
+            screen.blit(lbl_surf, (r.centerx - lbl_surf.get_width() // 2, r.bottom - 28))
+            pv_surf, _ = tiny.render("Lille preview", (130, 130, 130))
+            screen.blit(pv_surf, (r.x + 8, r.y + 6))
+
+        pg.display.flip()
+        clock_local.tick(60)
+
+        
 
 def win_screen():
     screen.fill(BACKGROUND)
@@ -113,8 +168,7 @@ def win_screen():
 
 
 def main():
-    return
-    
+    ...
 
 screen.fill((100,100,255)) #Baggrundsfarve
 
