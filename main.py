@@ -2,6 +2,7 @@ import pygame as pg
 import pygame.display as disp
 import pygame.freetype as ft
 import levels as lv
+from functools import partial
 
 pg.init()
 screen = disp.set_mode((1280, 720))
@@ -67,7 +68,7 @@ class Textbox:
         
 
 class Button:
-    def __init__(self, coordinates: tuple, color: pg.Color, width: int, height: int, screen, text: str, function: function, *args):
+    def __init__(self, coordinates: tuple, color: pg.Color, textcolor: pg.Color, width: int, height: int, screen, text: str, function):
         self.x = coordinates[0]
         self.y = coordinates[1]
         self.width = width
@@ -75,12 +76,12 @@ class Button:
         self.rect = pg.Rect(self.x, self.y, self.width, self.height)
 
         self.color = color
+        self.textcolor = textcolor
         self.text = text
         self.textfield = pg.Surface
         self.screen = screen
 
         self.function = function
-        self.args = args
 
     def draw(self):
         pg.draw.rect(self.screen, self.color, self.rect)
@@ -94,7 +95,7 @@ class Button:
 
     def event_check(self, event):
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
-            self.function(self.args)
+            self.function()
         
 
 def show_level(levelarray, list, gridsize):
@@ -109,6 +110,7 @@ def show_level(levelarray, list, gridsize):
 def won(level):
     levelheight = len(level)
     levelwidth = len(level[0])
+    global LettersLeft
     if LettersLeft == 0:
         for row in range(levelheight):
             for column in range(levelwidth):
@@ -175,18 +177,12 @@ def main_screen(screen):
         pg.display.flip()
         clock_local.tick(60)
 
-        
-
 def win_screen():
     screen.fill(BACKGROUND)
     win_textfield, win_rect = FONT1.render("Tillykke, du har vundet!",CORRECT)
     win_pos = (win_rect.x + (win_rect.width - win_textfield.get_width()) // 2,
                win_rect.y + (win_rect.height - win_textfield.get_height()) // 2)
     screen.blit(win_textfield, win_pos)
-
-
-def main():
-    ...
 
 screen.fill((100,100,255)) #Baggrundsfarve
 
@@ -206,6 +202,11 @@ testgridsize: int = 30
 testbox = Textbox(20,20,50,50,CORRECT,screen)
 boxes = [testbox]
 
+testbutton = Button((100, 100), CORRECT, BLACK, 100, 100, screen, "Test", win_screen)
+showlevelbutton = Button((200, 100), CORRECT, BLACK, 100, 50, screen, "Vis level", partial(show_level, testgrid, boxes, testgridsize))
+buttons = [testbutton, showlevelbutton]
+
+
 
 #Gameloop test
 while running:
@@ -218,6 +219,9 @@ while running:
         for box in boxes: #Håndter textbokse
             box.draw()
             box.check_events(event)
+        for button in buttons: #Håndter knapper
+            button.draw()
+            button.event_check(event)
     
     # Render
 
