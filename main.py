@@ -98,14 +98,24 @@ class Button:
             self.function()
         
 
-def show_level(levelarray, list, gridsize):
+def show_grid(levelarray, list, gridsize):
     for y, row in enumerate(levelarray):
         for x, value in enumerate(row):
             if value == 1:
                 box = Textbox(x*gridsize+200, y*gridsize+200, gridsize-2, gridsize-2, BLACK, screen)
                 list.append(box)
-                print(x,y)
-                print(x*gridsize+200,y*gridsize+200)    
+                # print(x,y)
+                # print(x*gridsize+200,y*gridsize+200)
+
+def load_level(levelarray, list, gridsize, lvl: int, imagearray):
+    show_grid(levelarray, list, gridsize)
+
+    for line in imagearray:
+        img = pg.image.load(imagepath(line[0])).convert()
+        img = pg.transform.scale(img, (50, 50))
+        screen.blit(img, line[1])
+    # show images
+        # -||-
 
 def won(level):
     levelheight = len(level)
@@ -120,6 +130,9 @@ def won(level):
     if LettersLeft == 0:
         win_screen()
         # waitForUserPress()
+
+def imagepath(filename: str):
+    return f".\\images\\{filename}"
 
 def main_screen(screen):
     """Kort, modulær startskærm. Returnerer valgt level (1..3) eller None ved luk."""
@@ -203,24 +216,29 @@ testbox = Textbox(20,20,50,50,CORRECT,screen)
 boxes = [testbox]
 
 testbutton = Button((100, 100), CORRECT, BLACK, 100, 100, screen, "Test", win_screen)
-showlevelbutton = Button((200, 100), CORRECT, BLACK, 100, 50, screen, "Vis level", partial(show_level, testgrid, boxes, testgridsize))
+showlevelbutton = Button((200, 100), CORRECT, BLACK, 100, 50, screen, "Vis level", partial(show_grid, lv.level1, boxes, testgridsize))
 buttons = [testbutton, showlevelbutton]
 
 
+for box in boxes:
+    box.draw()
+for button in buttons:
+    button.draw()
+
+load_level(lv.level1, boxes, 60, 2, lv.level1_images)
 
 #Gameloop test
 while running:
     clock.tick(60) # 60 FPS
+
 
     # Lyt efter input. Hvis spillet lukkes, stoppes spillet
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
         for box in boxes: #Håndter textbokse
-            box.draw()
             box.check_events(event)
         for button in buttons: #Håndter knapper
-            button.draw()
             button.event_check(event)
     
     # Render
