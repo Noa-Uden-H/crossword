@@ -109,8 +109,6 @@ def show_grid(levelarray, list, gridsize):
             if value == 1:
                 box = Textbox(x*gridsize+200, y*gridsize+200, gridsize-2, gridsize-2, BLACK, screen)
                 list.append(box)
-                # print(x,y)
-                # print(x*gridsize+200,y*gridsize+200)
 
 def load_level(levelarray, list, gridsize, lvl: int, imagearray):
     show_grid(levelarray, list, gridsize)
@@ -119,8 +117,6 @@ def load_level(levelarray, list, gridsize, lvl: int, imagearray):
         img = pg.image.load(imagepath(line[0])).convert()
         img = pg.transform.scale(img, (50, 50))
         screen.blit(img, line[1])
-    # show images
-        # -||-
 
 def won(level):
     levelheight = len(level)
@@ -134,7 +130,6 @@ def won(level):
     
     if LettersLeft == 0:
         win_screen()
-        # waitForUserPress()
 
 def imagepath(filename: str):
     return f".\\images\\{filename}"
@@ -201,6 +196,7 @@ def win_screen():
     win_pos = (win_rect.x + (win_rect.width - win_textfield.get_width()) // 2,
                win_rect.y + (win_rect.height - win_textfield.get_height()) // 2)
     screen.blit(win_textfield, win_pos)
+    # Wait for user input and exit 
 
 screen.fill((100,100,255)) #Baggrundsfarve
 
