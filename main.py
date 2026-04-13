@@ -21,6 +21,11 @@ BLACK = pg.Color("black")
 global FONT1
 FONT1 = ft.SysFont("Calibri", 50, False, False)
 
+class Level():
+    def __init__(self, level_nr, level_array):
+        ...
+
+
 class Textbox:
     def __init__(self, x: int, y: int, width: int, height: int, textcolor: pg.Color, screen: pg.Surface):
         self.x = x

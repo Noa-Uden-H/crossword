@@ -1,3 +1,4 @@
+#Level 1
 level1 = [
     [1,0,0,0,1,0,0,0],
     [1,0,0,1,1,1,1,1],
@@ -27,6 +28,7 @@ level1_images = [
     ("feste.jpg", (400, 300))
 ]
 
+#Level2
 level2 = [
     [0,1,0,0,0],
     [1,1,1,1,1],
@@ -50,3 +52,7 @@ level2_images = [
     ("balsam.jpg", (300,200)),
     ("bank.jpg", (200, 600))
 ]
+
+
+level1_array = [level1, level1_correct, level1_images]
+level2_array = [level2, level2_correct, level2_images]
