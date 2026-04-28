@@ -24,6 +24,7 @@ FONT1 = ft.SysFont("Calibri", 50, False, False)
 class Level():
     def __init__(self, level_nr, level_array):
         ...
+        # Evt Lettersleft og running?
 
 
 class Textbox:
@@ -40,25 +41,24 @@ class Textbox:
         self.text, self.textfield = "", pg.Surface
 
     def draw(self) -> None:
-        pg.draw.rect(self.screen, self.color, self.rect)
-        self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
-        # Centrer tekst
-        text_pos = (self.rect.x + (self.rect.width - self.textfield.get_width()) // 2,
+        pg.draw.rect(self.screen, self.color, self.rect)                        # Tegner selve rektanglet
+        self.textfield, self.textrect = FONT1.render(self.text, self.textcolor) # Loader teksten (bogstavet)
+        text_pos = (self.rect.x + (self.rect.width - self.textfield.get_width()) // 2,  # Centrer tekst
                     self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
-        self.screen.blit(self.textfield, text_pos)
+        self.screen.blit(self.textfield, text_pos)                              # Tegner teksten
 
     def check_events(self, event) -> None:
-        if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos): # Håndterer aktivering af klik. Kan laves mere effektiv?
+        if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):  # Håndterer aktivering af klik. Kan laves mere effektiv?
             self.active = not self.active
         if event.type == pg.MOUSEBUTTONDOWN and not self.rect.collidepoint(event.pos):
             self.active = False
         self.color = ACTIVE if self.active else INACTIVE
 
-        if event.type == pg.KEYDOWN and self.active:
+        if event.type == pg.KEYDOWN and self.active:                                # Håndterer indtastning
             if event.key not in (pg.K_RETURN, pg.K_SPACE, pg.K_BACKSPACE):
                 self.text = event.unicode
             if event.key == pg.K_RETURN:
-                self.checkcorrect()
+                self.checkcorrect() # Mangler variabel (efter Level-class)
         
         self.draw()
     
@@ -89,21 +89,21 @@ class Button:
         self.function = function
 
     def draw(self):
-        pg.draw.rect(self.screen, self.color, self.rect)
+        pg.draw.rect(self.screen, self.color, self.rect)    # Tegner knappens rektangel
 
-        if self.text != '':
+        if self.text != '': # Kører kun, hvis der er en tekst på knappen
             self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
             # Centrer tekst
             text_pos = (self.rect.x + (self.rect.width - self.textfield.get_width()) // 2,
                         self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
-            self.screen.blit(self.textfield, text_pos)
+            self.screen.blit(self.textfield, text_pos)  # Tegner teksten
 
-    def event_check(self, event):
+    def event_check(self, event):   # Checker, om knappen er blevet klikket på
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
             self.function()
         
 
-def show_grid(levelarray, list, gridsize):
+def show_grid(levelarray, list, gridsize):  # Looper igennem levelarray og genererer en liste af Textbox-objekter for hvert felt med 1.
     for y, row in enumerate(levelarray):
         for x, value in enumerate(row):
             if value == 1:
@@ -111,9 +111,9 @@ def show_grid(levelarray, list, gridsize):
                 list.append(box)
 
 def load_level(levelarray, list, gridsize, lvl: int, imagearray):
-    show_grid(levelarray, list, gridsize)
+    show_grid(levelarray, list, gridsize)   # Laver griddet af tekstbokse
 
-    for line in imagearray:
+    for line in imagearray:                 # Laver billederne
         img = pg.image.load(imagepath(line[0])).convert()
         img = pg.transform.scale(img, (50, 50))
         screen.blit(img, line[1])
@@ -131,10 +131,10 @@ def won(level):
     if LettersLeft == 0:
         win_screen()
 
-def imagepath(filename: str):
+def imagepath(filename: str):   # Tilføjer ".\images\" inden hvert billedes filnavn
     return f".\\images\\{filename}"
 
-def main_screen(screen):
+def main_screen(screen):        # Omskriv med Button-class og evt sæt fonts under Globals
     """Kort, modulær startskærm. Returnerer valgt level (1..3) eller None ved luk."""
     clock_local = pg.time.Clock()
     W, H = screen.get_size()
@@ -220,7 +220,7 @@ testbutton = Button((100, 100), CORRECT, BLACK, 100, 100, screen, "Test", win_sc
 showlevelbutton = Button((200, 100), CORRECT, BLACK, 100, 50, screen, "Vis level", partial(show_grid, lv.level1, boxes, testgridsize))
 buttons = [testbutton, showlevelbutton]
 
-
+#Looper igennem hhv. box og button-listerne og tegner dem
 for box in boxes:
     box.draw()
 for button in buttons:
@@ -237,10 +237,10 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-        for box in boxes: #Håndter textbokse
-            box.check_events(event)
-        for button in buttons: #Håndter knapper
-            button.event_check(event)
+        for box in boxes:               #Lyt efter events for boxes
+            box.check_events(event)     #Håndter textbokse
+        for button in buttons:          #Lyt efter events for buttons
+            button.event_check(event)   #Håndter knapper
     
     # Render
 
