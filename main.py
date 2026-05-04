@@ -1,78 +1,108 @@
+# =========================
+# IMPORTS
+# =========================
 import pygame as pg
 import pygame.display as disp
 import pygame.freetype as ft
 import levels as lv
 from functools import partial
 
+
+# =========================
+# INITIALISERING
+# =========================
 pg.init()
 screen = disp.set_mode((1280, 720))
 clock = pg.time.Clock()
-running = True
-LettersLeft = 0
+game_running = True
+# Antal felter der stadig mangler at blive udfyldt korrekt
+remaining_letters = 0
 
-global INACTIVE, ACTIVE, CORRECT, BUTTON, BACKGROUND, BLACK
-INACTIVE = pg.Color("white")
-ACTIVE = pg.Color("skyblue")
-CORRECT = pg.Color("green4")
-BUTTON = pg.Color("blue4")
-BACKGROUND = pg.Color("gray74")
-BLACK = pg.Color("black")
+# =========================
+# FARVER (DESIGN TIL ÆLDRE BRUGERE)
+# =========================
+COLOR_INACTIVE = pg.Color("white")        # tomt felt
+COLOR_ACTIVE = pg.Color("skyblue")        # markeret felt
+COLOR_CORRECT = pg.Color("green4")        # korrekt svar
+COLOR_INCORRECT = pg.Color("red3")        # forkert svar
+COLOR_BUTTON = pg.Color("blue4")          # knapper
+COLOR_BACKGROUND = pg.Color("gray74")     # baggrund
+COLOR_TEXT = pg.Color("black")            # standard tekst
 
-global FONT1
-FONT1 = ft.SysFont("Calibri", 50, False, False)
+# =========================
+# FONT (STOR FOR LÆSBARHED)
+# =========================
+UI_FONT = ft.SysFont("Calibri", 50, False, False)
 
 class Level():
     def __init__(self, level_nr, level_array):
         ...
         # Evt Lettersleft og running?
 
-
-class Textbox:
-    def __init__(self, x: int, y: int, width: int, height: int, textcolor: pg.Color, screen: pg.Surface):
+# =========================
+# CROSSWORD CELL (ET FELT I GRID)
+# =========================
+class CrosswordCell:
+    """
+    Repræsenterer ét felt i krydsordet.
+    Håndterer input, visning og korrekthed.
+    """
+    def __init__(self, x: int, y: int, width: int, height: int, textcolor: pg.Color, screen: pg.Surface) -> None:
         self.x = x
         self.y = y
         self.rect = pg.Rect(x, y, width, height)
         self.textcolor = textcolor
         self.screen = screen
         
-        self.color = INACTIVE
-        self.active = False
+        self.color = COLOR_INACTIVE
+        self.is_active = False
 
         self.text, self.textfield = "", pg.Surface
 
     def draw(self) -> None:
+        """
+        Tegner cellen og dens bogstav på skærmen
+        """
         pg.draw.rect(self.screen, self.color, self.rect)                        # Tegner selve rektanglet
-        self.textfield, self.textrect = FONT1.render(self.text, self.textcolor) # Loader teksten (bogstavet)
+        self.textfield, self.textrect = UI_FONT.render(self.text, self.textcolor) # Loader teksten (bogstavet)
         text_pos = (self.rect.x + (self.rect.width - self.textfield.get_width()) // 2,  # Centrer tekst
                     self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
         self.screen.blit(self.textfield, text_pos)                              # Tegner teksten
 
-    def check_events(self, event) -> None:
+    def handle_events(self, event, solution_grid) -> None:
+        """
+        Håndterer klik og tastaturinput
+        """
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):  # Håndterer aktivering af klik. Kan laves mere effektiv?
-            self.active = not self.active
+            self.is_active = not self.is_active
         if event.type == pg.MOUSEBUTTONDOWN and not self.rect.collidepoint(event.pos):
-            self.active = False
-        self.color = ACTIVE if self.active else INACTIVE
+            self.is_active = False
+        self.color = COLOR_ACTIVE if self.is_active else COLOR_INACTIVE
 
-        if event.type == pg.KEYDOWN and self.active:                                # Håndterer indtastning
+        if event.type == pg.KEYDOWN and self.is_active:                             # Håndterer indtastning
             if event.key not in (pg.K_RETURN, pg.K_SPACE, pg.K_BACKSPACE):
                 self.text = event.unicode
             if event.key == pg.K_RETURN:
-                self.checkcorrect() # Mangler variabel (efter Level-class)
+                self.check_answer(solution_grid)
         
         self.draw()
     
-    def checkcorrect(self, correctarray) -> bool:
-        if correctarray[self.x][self.y] == self.text:
-            self.color = CORRECT
-            LettersLeft -= 1
-            return True
+    def check_answer(self, correctarray) -> None:
+        """
+        Tjekker om bogstavet er korrekt i forhold til løsningen
+        """
+        global remaining_letters
+
+        if correctarray[self.x][self.y] == self.text:   # Tag højde for gridsize
+            self.color = COLOR_CORRECT
+            remaining_letters -= 1
         else:
             self.text = ""
-            return False
         
-
-class Button:
+# =========================
+# UI BUTTON (GENANVENDIG KNAP)
+# =========================
+class UI_Button:
     def __init__(self, coordinates: tuple, color: pg.Color, textcolor: pg.Color, width: int, height: int, screen, text: str, function):
         self.x = coordinates[0]
         self.y = coordinates[1]
@@ -80,7 +110,9 @@ class Button:
         self.height = height
         self.rect = pg.Rect(self.x, self.y, self.width, self.height)
 
-        self.color = color
+        self.base_color = color
+        self.hover_color = pg.Color("dodgerblue3")
+
         self.textcolor = textcolor
         self.text = text
         self.textfield = pg.Surface
@@ -89,52 +121,217 @@ class Button:
         self.function = function
 
     def draw(self):
-        pg.draw.rect(self.screen, self.color, self.rect)    # Tegner knappens rektangel
+        """
+        Tegner knappen med hover-effekt
+        """
+        mouse_pos = pg.mouse.get_pos()
 
+        # Skift farve ved hover
+        color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.base_color
+
+        pg.draw.rect(self.screen, color, self.rect, border_radius=10)    # Tegner knappens rektangel
+
+        # Tekst på knap
         if self.text != '': # Kører kun, hvis der er en tekst på knappen
-            self.textfield, self.textrect = FONT1.render(self.text, self.textcolor)
+            self.textfield, self.textrect = UI_FONT.render(self.text, self.textcolor)
             # Centrer tekst
             text_pos = (self.rect.x + (self.rect.width - self.textfield.get_width()) // 2,
                         self.rect.y + (self.rect.height - self.textfield.get_height()) // 2)
             self.screen.blit(self.textfield, text_pos)  # Tegner teksten
 
     def event_check(self, event):   # Checker, om knappen er blevet klikket på
+        """
+        Kalder funktion når knappen trykkes
+        """
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
             self.function()
         
 
-def show_grid(levelarray, list, gridsize):  # Looper igennem levelarray og genererer en liste af Textbox-objekter for hvert felt med 1.
-    for y, row in enumerate(levelarray):
+# =========================
+# GRID CREATION (CENTRERING AF KRYDSORD)
+# =========================
+def create_centered_crossword(level_layout, cell_size) -> list:  # Looper igennem levelarray og genererer en liste af Textbox-objekter for hvert felt med 1.
+    """
+    Opretter krydsords-grid og centrerer det på skærmen
+    """
+    cells = []
+
+    # Beregn startposition så grid er centreret
+    start_x = (1280 - len(level_layout[0]) * cell_size) // 2
+    start_y = (720 - len(level_layout) * cell_size) // 2
+
+    for y, row in enumerate(level_layout):
         for x, value in enumerate(row):
             if value == 1:
-                box = Textbox(x*gridsize+200, y*gridsize+200, gridsize-2, gridsize-2, BLACK, screen)
-                list.append(box)
+                box = CrosswordCell(
+                    start_x + x * cell_size,
+                    start_y + y * cell_size,
+                    cell_size - 2,
+                    cell_size - 2,
+                    COLOR_TEXT,
+                    screen
+                    )
+                cells.append(box)
+
+    return cells
+
+# =========================
+# FEEDBACK BAR (TOPPEN AF SKÆRMEN)
+# =========================
+def render_feedback_bar(message, is_correct=True):
+    """
+    Viser feedback til spilleren (grøn = korrekt, rød = forkert)
+    """
+
+    color = COLOR_CORRECT if is_correct else COLOR_INCORRECT
+
+    pg.draw.rect(screen, color, (0, 0, 1280, 60))
+
+    text_surface, _ = UI_FONT.render(message, pg.Color("white"))
+    screen.blit(text_surface, (20, 10))
+
+# =========================
+# START MENU
+# =========================
+def show_start_menu():
+    """
+    Startskærm hvor spilleren vælger level
+    """
+    screen.fill(COLOR_BACKGROUND)   #Rykket uden for while-loop (skal kun gøres en gang)
+
+    while True:
+
+        title, _ = UI_FONT.render("Krydsord", COLOR_TEXT)
+        screen.blit(title, (500, 50))
+
+        # Knapper til levels
+        level_1_btn = UI_Button((300, 300), COLOR_BUTTON, COLOR_TEXT, 200, 80, screen, "Level 1", lambda: 1)
+        level_2_btn = UI_Button((550, 300), COLOR_BUTTON, COLOR_TEXT, 200, 80, screen,  "Level 2", lambda: 2)
+
+        buttons = [level_1_btn, level_2_btn]
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                return None
+
+            for btn in buttons:         # Ændret til kun et for-loop
+                btn.event_check(event)  # Ændret til at bruge UI_Buttons indbyggede funktion event_check
+                btn.draw()
+
+        pg.display.flip()
+
+# =========================
+# GAMEPLAY LOOP (ET LEVEL)
+# =========================
+def play_crossword_level(level_data, solution_data):
+    """
+    Selve spillet hvor brugeren løser krydsordet
+    """
+
+    global remaining_letters, game_running
+
+    cell_size = 60
+
+    # Opret grid
+    cells = create_centered_crossword(level_data, cell_size)
+
+    # Hvor mange felter der skal udfyldes
+    remaining_letters = sum(row.count(1) for row in level_data)
+
+    hint_button = UI_Button((50, 650), COLOR_BUTTON, 200, 60, "Hint", lambda: print("Hint"))
+
+    while True:
+        screen.fill(COLOR_BACKGROUND)
+
+        # Vis status
+        render_feedback_bar(f"Tilbage: {remaining_letters}", True)
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                game_running = False
+
+            # Input til felter
+            for cell in cells:
+                cell.handle_event(event, solution_data)
+
+            hint_button.handle_event(event)
+
+        # Tegn grid
+        for cell in cells:
+            cell.draw()
+
+        # Tegn knap
+        hint_button.draw(screen)
+
+        # Tjek om spillet er vundet
+        if remaining_letters <= 0:
+            show_win_screen()
+            return
+
+        pg.display.flip()
+        clock.tick(60)
+
+# =========================
+# WIN SCREEN
+# =========================
+def show_win_screen():
+    """
+    Vises når spilleren har klaret krydsordet
+    """
+
+    screen.fill(COLOR_BACKGROUND)
+
+    text, _ = UI_FONT.render("Tillykke, du vandt!", COLOR_CORRECT)
+    screen.blit(text, (450, 300))
+
+    pg.display.flip()
+    pg.time.wait(2000)
+
+# =========================
+# MAIN LOOP (PROGRAM START)
+# =========================
+while game_running:
+
+    chosen_level = show_start_menu()
+
+    if chosen_level == 1:
+        play_crossword_level(lv.level1, lv.level1_correct)
+
+    elif chosen_level == 2:
+        play_crossword_level(lv.level2, lv.level2_correct)
+
+    else:
+        game_running = False
+
+
+def imagepath(filename: str):   # Tilføjer ".\images\" inden hvert billedes filnavn
+    return f".\\images\\{filename}"
+
+# ====================================
+# Alt under her skal nok slettes - skal noget af det bruges?
 
 def load_level(levelarray, list, gridsize, lvl: int, imagearray):
-    show_grid(levelarray, list, gridsize)   # Laver griddet af tekstbokse
+    create_centered_crossword(levelarray, list, gridsize)   # Laver griddet af tekstbokse
 
     for line in imagearray:                 # Laver billederne
         img = pg.image.load(imagepath(line[0])).convert()
         img = pg.transform.scale(img, (50, 50))
         screen.blit(img, line[1])
 
-def won(level):
+def calculate_remaining_letters(level):
     levelheight = len(level)
     levelwidth = len(level[0])
-    global LettersLeft
-    if LettersLeft == 0:
+    global remaining_letters
+    if remaining_letters == 0:
         for row in range(levelheight):
             for column in range(levelwidth):
                 if level[row][column] !=0:
-                    LettersLeft +=1
+                    remaining_letters +=1
     
-    if LettersLeft == 0:
+    if remaining_letters == 0:
         win_screen()
 
-def imagepath(filename: str):   # Tilføjer ".\images\" inden hvert billedes filnavn
-    return f".\\images\\{filename}"
-
-def main_screen(screen):        # Omskriv med Button-class og evt sæt fonts under Globals
+# def main_screen(screen):        # Omskriv med Button-class og evt sæt fonts under Globals
     """Kort, modulær startskærm. Returnerer valgt level (1..3) eller None ved luk."""
     clock_local = pg.time.Clock()
     W, H = screen.get_size()
@@ -173,16 +370,16 @@ def main_screen(screen):        # Omskriv med Button-class og evt sæt fonts und
                         return idx
 
         # Tegning
-        screen.fill(BACKGROUND)
+        screen.fill(COLOR_BACKGROUND)
         pg.draw.rect(screen, (220, 220, 220), (0, 0, W, 70))
-        center_render(screen, "Krydsord", FONT1, BLACK, 20)
-        center_render(screen, "Vælg et level og begynd det sjove", small, BLACK, 100)
+        center_render(screen, "Krydsord", UI_FONT, COLOR_TEXT, 20)
+        center_render(screen, "Vælg et level og begynd det sjove", small, COLOR_TEXT, 100)
 
         for i, r in enumerate(buttons, 1):
             pg.draw.rect(screen, (150, 150, 150), r.inflate(4, 4))
             pg.draw.rect(screen, (200, 200, 200), r)
             draw_thumb(screen, r)
-            lbl_surf, _ = ft.SysFont("Calibri", 18).render(f"Level {i}", BLACK)
+            lbl_surf, _ = ft.SysFont("Calibri", 18).render(f"Level {i}", COLOR_TEXT)
             screen.blit(lbl_surf, (r.centerx - lbl_surf.get_width() // 2, r.bottom - 28))
             pv_surf, _ = tiny.render("Lille preview", (130, 130, 130))
             screen.blit(pv_surf, (r.x + 8, r.y + 6))
@@ -191,8 +388,8 @@ def main_screen(screen):        # Omskriv med Button-class og evt sæt fonts und
         clock_local.tick(60)
 
 def win_screen():
-    screen.fill(BACKGROUND)
-    win_textfield, win_rect = FONT1.render("Tillykke, du har vundet!",CORRECT)
+    screen.fill(COLOR_BACKGROUND)
+    win_textfield, win_rect = UI_FONT.render("Tillykke, du har vundet!",COLOR_CORRECT)
     win_pos = (win_rect.x + (win_rect.width - win_textfield.get_width()) // 2,
                win_rect.y + (win_rect.height - win_textfield.get_height()) // 2)
     screen.blit(win_textfield, win_pos)
@@ -200,7 +397,7 @@ def win_screen():
 
 screen.fill((100,100,255)) #Baggrundsfarve
 
-ft.Font.render_to(FONT1, screen, pg.Rect(500,50,300,300), "Hello World", BLACK, (255,255,255)) #Viser tekst på "screen"
+ft.Font.render_to(UI_FONT, screen, pg.Rect(500,50,300,300), "Hello World", COLOR_TEXT, (255,255,255)) #Viser tekst på "screen"
     
 # Tekstbokse
 testgrid = [
@@ -213,11 +410,11 @@ testgrid = [
 testgridsize: int = 30
 
 
-testbox = Textbox(20,20,50,50,CORRECT,screen)
+testbox = CrosswordCell(20,20,50,50,COLOR_CORRECT,screen)
 boxes = [testbox]
 
-testbutton = Button((100, 100), CORRECT, BLACK, 100, 100, screen, "Test", win_screen)
-showlevelbutton = Button((200, 100), CORRECT, BLACK, 100, 50, screen, "Vis level", partial(show_grid, lv.level1, boxes, testgridsize))
+testbutton = UI_Button((100, 100), COLOR_CORRECT, COLOR_TEXT, 100, 100, screen, "Test", win_screen)
+showlevelbutton = UI_Button((200, 100), COLOR_CORRECT, COLOR_TEXT, 100, 50, screen, "Vis level", partial(create_centered_crossword, lv.level1, boxes, testgridsize))
 buttons = [testbutton, showlevelbutton]
 
 #Looper igennem hhv. box og button-listerne og tegner dem
@@ -229,16 +426,16 @@ for button in buttons:
 load_level(lv.level1, boxes, 60, 2, lv.level1_images)
 
 #Gameloop test
-while running:
+while game_running:
     clock.tick(60) # 60 FPS
 
 
     # Lyt efter input. Hvis spillet lukkes, stoppes spillet
     for event in pg.event.get():
         if event.type == pg.QUIT:
-            running = False
+            game_running = False
         for box in boxes:               #Lyt efter events for boxes
-            box.check_events(event)     #Håndter textbokse
+            box.handle_events(event)     #Håndter textbokse
         for button in buttons:          #Lyt efter events for buttons
             button.event_check(event)   #Håndter knapper
     
