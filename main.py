@@ -308,7 +308,15 @@ def imagepath(filename: str):   # Tilføjer ".\images\" inden hvert billedes fil
     return f".\\images\\{filename}"
 
 # ====================================
+# ====================================
+# ====================================
+#
 # Alt under her skal nok slettes - skal noget af det bruges?
+#
+# ====================================
+# ====================================
+# ====================================
+
 
 def load_level(levelarray, list, gridsize, lvl: int, imagearray):
     create_centered_crossword(levelarray, list, gridsize)   # Laver griddet af tekstbokse
