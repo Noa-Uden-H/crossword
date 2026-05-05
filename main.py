@@ -116,7 +116,7 @@ class CrosswordCell:
         Tjekker om bogstavet er korrekt i forhold til løsningen
         """
 
-        if correctarray[self.x][self.y] == self.text:
+        if correctarray[self.y][self.x] == self.text:
             self.color = COLOR_CORRECT
             GAME.remaining_letters -= 1
         else:
