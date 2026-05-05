@@ -22,12 +22,11 @@ level1_correct = [
     [0,0,0,0,"G",0,0,0]
 ]
 level1_images = [
-    ("lamper.jpg", (300, 200)),
-    ("belysning.jpg", (600, 200)),
-    ("papaya.jpg", (200, 500)),
-    ("feste.jpg", (400, 300))
+    ("lamper.jpg", (405, 66)),
+    ("belysning.jpg", (645, 66)),
+    ("papaya.jpg", (345, 305)),
+    ("feste.jpg", (525, 184))
 ]
-
 #Level2
 level2 = [
     [0,1,0,0,0],
@@ -48,9 +47,9 @@ level2_correct = [
 ]
 
 level2_images = [
-    ("bager.jpg", (200, 300)),
-    ("balsam.jpg", (300,200)),
-    ("bank.jpg", (200, 600))
+    ("bager.jpg", (435, 245)),
+    ("balsam.jpg", (555,125)),
+    ("bank.jpg", (435, 424))
 ]
 
 
