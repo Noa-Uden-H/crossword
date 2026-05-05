@@ -82,6 +82,7 @@ class CrosswordCell:
         self.is_active = False
 
         self.text, self.textfield = "", pg.Surface
+        self.correct = False
 
     def draw(self) -> None:
         """
@@ -116,9 +117,12 @@ class CrosswordCell:
         Tjekker om bogstavet er korrekt i forhold til løsningen
         """
 
+        if self.correct == True:
+            return
         if correctarray[self.y][self.x] == self.text:
             self.color = COLOR_CORRECT
             GAME.remaining_letters -= 1
+            self.correct = True
         else:
             self.text = ""
         
