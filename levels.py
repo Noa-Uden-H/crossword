@@ -48,9 +48,9 @@ level2_correct = [
 ]
 
 level2_images = [
-    ("bager.jpg", (435, 245)),
-    ("balsam.jpg", (555,125)),
-    ("bank.jpg", (435, 424))
+    ("bager.jpg", (435, 275)),
+    ("balsam.jpg", (555,155)),
+    ("bank.jpg", (435, 454))
 ]
 
 

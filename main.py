@@ -185,7 +185,7 @@ def create_centered_crossword() -> list:  # Looper igennem levelarray og generer
 
     # Beregn startposition så grid er centreret
     start_x = (1280 - len(GAME.level_data[0]) * cell_size) // 2
-    start_y = (720 - len(GAME.level_data) * cell_size) // 2
+    start_y = ((720 - len(GAME.level_data) * cell_size) // 2) + 30 #Giver plads til billeder over griddet
 
     for y, row in enumerate(GAME.level_data):
         for x, value in enumerate(row):
